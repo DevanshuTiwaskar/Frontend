@@ -1,5 +1,3 @@
-// src/components/SidebarContent.jsx
-
 import React, { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
 import { Home, Search, Library, Plus, Music2, Heart } from "lucide-react";
@@ -8,7 +6,6 @@ import { musicApi } from "../api/axiosMusic.js";
 import { useModalStore } from "../store/useModalStore.js";
 
 const NavItem = ({ to, icon, children }) => (
-  // ... (No change here)
   <NavLink
     to={to}
     className={({ isActive }) =>
@@ -24,23 +21,24 @@ const NavItem = ({ to, icon, children }) => (
   </NavLink>
 );
 
-const PlaylistLink = ({ playlist }) => (
-  <NavLink
-    to={`/playlist/${playlist.id}`} // ⭐ FIX 1: Use playlist.id
-    className={({ isActive }) =>
-      `block w-full text-left px-4 py-1.5 text-sm truncate rounded transition-colors ${
-        isActive
-          ? "text-primary"
-          : "text-muted-foreground hover:text-white"
-      }`
-    }
-  >
-    {playlist.name}
-  </NavLink>
-);
+const PlaylistLink = ({ playlist }) => {
+  const pid = playlist.id || playlist._id;
+  return (
+    <NavLink
+      to={`/playlist/${pid}`}
+      className={({ isActive }) =>
+        `block w-full text-left px-4 py-1.5 text-sm truncate rounded transition-colors ${
+          isActive ? "text-primary" : "text-muted-foreground hover:text-white"
+        }`
+      }
+    >
+      {playlist.name}
+    </NavLink>
+  );
+};
 
 export default function SidebarContent() {
-  const { openPlaylistModal } = useModalStore();
+  const { openCreatePlaylist } = useModalStore();
   const [playlists, setPlaylists] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -51,7 +49,7 @@ export default function SidebarContent() {
         const data = await musicApi.getPlaylists();
         setPlaylists(data.playlists || []);
       } catch (error) {
-        console.error("Failed to fetch playlists for sidebar", error);
+        console.error("Failed to fetch playlists for sidebar:", error);
       } finally {
         setLoading(false);
       }
@@ -63,7 +61,6 @@ export default function SidebarContent() {
     <>
       {/* Main Nav */}
       <nav className="flex flex-col gap-1.5 mb-6 px-4">
-        {/* ... (No change here) ... */}
         <NavItem to="/dashboard" icon={<Home size={20} />}>
           Discover
         </NavItem>
@@ -75,15 +72,14 @@ export default function SidebarContent() {
         </NavItem>
       </nav>
 
-      {/* Secondary Nav & Playlists */}
+      {/* Playlist Section */}
       <div className="flex-1 flex flex-col gap-4 overflow-hidden">
         <div className="flex items-center justify-between px-4">
-          {/* ... (No change here) ... */}
           <h2 className="text-xs font-semibold uppercase text-muted-foreground tracking-wider">
             Playlists
           </h2>
           <motion.button
-            onClick={openPlaylistModal}
+            onClick={openCreatePlaylist}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             className="p-1 rounded-md text-muted-foreground transition-colors hover:text-white hover:bg-white/10"
@@ -93,10 +89,8 @@ export default function SidebarContent() {
           </motion.button>
         </div>
 
-        {/* Playlist List */}
         <div className="flex-1 flex flex-col gap-1.5 overflow-y-auto pr-1">
           <div className="px-4">
-            {/* ... (No change here) ... */}
             <NavItem to="/collection/liked" icon={<Heart size={20} />}>
               Liked Songs
             </NavItem>
@@ -104,19 +98,18 @@ export default function SidebarContent() {
               My Uploads
             </NavItem>
           </div>
-          
+
           <hr className="border-white/10 my-2" />
-          
+
           <div className="px-4 space-y-1.5">
             {loading ? (
               <div className="text-sm text-muted-foreground">Loading playlists...</div>
-            ) : (
+            ) : playlists.length > 0 ? (
               playlists.map((playlist) => (
-                <PlaylistLink 
-                  key={playlist.id} // ⭐ FIX 2: Use playlist.id
-                  playlist={playlist} 
-                />
+                <PlaylistLink key={playlist.id || playlist._id} playlist={playlist} />
               ))
+            ) : (
+              <div className="text-sm text-muted-foreground">No playlists found</div>
             )}
           </div>
         </div>

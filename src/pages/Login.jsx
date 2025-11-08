@@ -1,56 +1,68 @@
 import React from "react";
 import { useForm } from "react-hook-form";
-import { useAuth } from "../context/AuthContext.jsx"; // Use the custom hook
-import { useNavigate, Link } from "react-router-dom";
+import { useAuth } from "../context/AuthContext.jsx";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
-
-// --- Icons ---
 import { Mail, Lock, Waves, Loader2 } from "lucide-react";
 
-// --- Google Icon SVG (for the button) ---
+// --- Google Icon SVG ---
 const GoogleIcon = () => (
   <svg className="w-5 h-5" viewBox="0 0 48 48">
     <path
       fill="#FFC107"
-      d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8c-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4C12.955 4 4 12.955 4 24s8.955 20 20 20s20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z"
+      d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8
+        c-6.627 0-12-5.373-12-12s5.373-12 12-12
+        c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657
+        C34.046 6.053 29.268 4 24 4
+        C12.955 4 4 12.955 4 24s8.955 20 20 20
+        s20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z"
     ></path>
     <path
       fill="#FF3D00"
-      d="M6.306 14.691l6.571 4.819C14.655 15.108 18.961 12 24 12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4C16.318 4 9.656 8.337 6.306 14.691z"
+      d="M6.306 14.691l6.571 4.819
+        C14.655 15.108 18.961 12 24 12
+        c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657
+        C34.046 6.053 29.268 4 24 4
+        C16.318 4 9.656 8.337 6.306 14.691z"
     ></path>
     <path
       fill="#4CAF50"
-      d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-5.238C29.211 35.091 26.715 36 24 36c-5.045 0-9.36-3.108-11.423-7.461l-6.571 4.819C9.656 39.663 16.318 44 24 44z"
+      d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-5.238
+        C29.211 35.091 26.715 36 24 36
+        c-5.045 0-9.36-3.108-11.423-7.461l-6.571 4.819
+        C9.656 39.663 16.318 44 24 44z"
     ></path>
     <path
       fill="#1976D2"
-      d="M43.611 20.083H42V20H24v8h11.303c-.792 2.237-2.231 4.166-4.087 5.571l6.19 5.238C39.099 34.61 44 28.134 44 20c0-1.341-.138-2.65-.389-3.917z"
+      d="M43.611 20.083H42V20H24v8h11.303
+        c-.792 2.237-2.231 4.166-4.087 5.571l6.19 5.238
+        C39.099 34.61 44 28.134 44 20
+        c0-1.341-.138-2.65-.389-3.917z"
     ></path>
   </svg>
 );
 
 // --- Custom Input Component ---
-// This provides the label animation and icon
-const Input = ({ register, name, label, error, icon, ...rest }) => (
+const Input = ({ label, name, register, rules, error, icon, ...rest }) => (
   <div className="relative w-full">
     <div
       className="flex items-center gap-3 glass border border-white/20 rounded-lg px-3 py-3
-                 focus-within:ring-2 focus-within:ring-primary"
+                 focus-within:ring-2 focus-within:ring-primary transition-all"
     >
       {icon}
       <input
         id={name}
-        {...register(name)}
+        {...register(name, rules)}
         className="w-full bg-transparent outline-none placeholder:text-transparent peer"
         {...rest}
-        placeholder={label} // Placeholder is used for a11y, but hidden by peer-focus
+        placeholder={label}
       />
       <label
         htmlFor={name}
         className="absolute left-10 text-muted-foreground transition-all 
                    peer-focus:-top-2.5 peer-focus:left-3 peer-focus:text-xs peer-focus:bg-background px-1
                    peer-placeholder-shown:top-3 peer-placeholder-shown:text-base
-                   -top-2.5 left-3 text-xs bg-background" // Default state for populated fields
+                   -top-2.5 left-3 text-xs bg-background"
       >
         {label}
       </label>
@@ -59,28 +71,26 @@ const Input = ({ register, name, label, error, icon, ...rest }) => (
   </div>
 );
 
-// --- Animation Variants ---
+// --- Motion Animations ---
 const containerVariants = {
   hidden: { opacity: 0, y: 20 },
   visible: {
     opacity: 1,
     y: 0,
-    transition: {
-      duration: 0.5,
-      staggerChildren: 0.1,
-    },
+    transition: { duration: 0.5, staggerChildren: 0.1 },
   },
 };
 
-const itemVariants = {
-  hidden: { opacity: 0, y: 10 },
-  visible: { opacity: 1, y: 0 },
-};
+const itemVariants = { hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0 } };
 
-// --- Main Login Component ---
+// --- Main Component ---
 export default function Login() {
   const { login, loading, googleLogin } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const from = location.state?.from?.pathname || "/dashboard";
+
   const {
     register,
     handleSubmit,
@@ -90,7 +100,8 @@ export default function Login() {
   const onSubmit = async (data) => {
     const res = await login(data.email, data.password);
     if (res.ok) {
-      navigate("/dashboard");
+      // Wait a bit for AuthContext to update before redirect
+      setTimeout(() => navigate(from, { replace: true }), 300);
     }
   };
 
@@ -106,9 +117,7 @@ export default function Login() {
         <motion.div variants={itemVariants} className="text-center mb-8">
           <Waves className="mx-auto text-primary" size={40} />
           <h2 className="text-3xl font-bold mt-4">Welcome back to Aura</h2>
-          <p className="text-muted-foreground mt-2">
-            Sign in to access your music.
-          </p>
+          <p className="text-muted-foreground mt-2">Sign in to access your music.</p>
         </motion.div>
 
         {/* Login Form */}
@@ -118,9 +127,8 @@ export default function Login() {
               label="Email"
               name="email"
               type="email"
-              register={(name) => register(name, {
-                required: "Email is required",
-              })}
+              register={register}
+              rules={{ required: "Email is required" }}
               error={errors.email}
               icon={<Mail size={18} className="text-muted-foreground" />}
             />
@@ -131,18 +139,14 @@ export default function Login() {
               label="Password"
               name="password"
               type="password"
-              register={(name) => register(name, {
-                required: "Password is required",
-              })}
+              register={register}
+              rules={{ required: "Password is required" }}
               error={errors.password}
               icon={<Lock size={18} className="text-muted-foreground" />}
             />
           </motion.div>
 
-          <motion.div
-            variants={itemVariants}
-            className="text-right text-sm"
-          >
+          <motion.div variants={itemVariants} className="text-right text-sm">
             <Link
               to="/forgot"
               className="text-primary font-medium transition-all hover:underline"

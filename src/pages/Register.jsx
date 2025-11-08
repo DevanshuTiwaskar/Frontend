@@ -119,7 +119,7 @@ export default function Register() {
     const res = await registerUser(payload);
     
     if (res.ok) {
-      navigate("/dashboard");
+       setTimeout(() => navigate("/dashboard"), 300);
     }
   };
 

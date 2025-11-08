@@ -27,6 +27,7 @@ const CreatePlaylistCard = () => {
 
 // Card for an existing playlist
 const PlaylistCard = ({ playlist }) => {
+  console.log(playlist._id)
   const navigate = useNavigate();
   return (
     <motion.div

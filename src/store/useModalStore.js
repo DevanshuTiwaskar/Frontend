@@ -1,14 +1,12 @@
-// src/store/useModalStore.js
-
-import { create } from 'zustand';
+import { create } from "zustand";
 
 export const useModalStore = create((set) => ({
-  // --- Playlist Modal State ---
-  isPlaylistModalOpen: false,
-  openPlaylistModal: () => set({ isPlaylistModalOpen: true }),
-  closePlaylistModal: () => set({ isPlaylistModalOpen: false }),
+  // Create Playlist modal
+  isCreatePlaylistOpen: false,
+  openCreatePlaylist: () => set({ isCreatePlaylistOpen: true }),
+  closeCreatePlaylist: () => set({ isCreatePlaylistOpen: false }),
 
-  // --- ⭐ NEW: Mobile Menu State ---
+  // Mobile menu
   isMobileMenuOpen: false,
   openMobileMenu: () => set({ isMobileMenuOpen: true }),
   closeMobileMenu: () => set({ isMobileMenuOpen: false }),

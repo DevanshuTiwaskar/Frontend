@@ -8,7 +8,6 @@ import './index.css'; // Your main Tailwind stylesheet
 import App from './app';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
-  <React.StrictMode>
     <BrowserRouter>
       {/* Provide the AuthContext to the entire app.
         Now, useAuth() will work everywhere.
@@ -18,6 +17,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
           Now, usePlayer() will work everywhere.
         */}
         <PlayerProvider>
+
           <App />
           {/* This renders the toast notifications from your AuthContext */}
           <Toaster 
@@ -32,5 +32,4 @@ ReactDOM.createRoot(document.getElementById('root')).render(
         </PlayerProvider>
       </AuthProvider>
     </BrowserRouter>
-  </React.StrictMode>
 );

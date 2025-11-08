@@ -17,7 +17,9 @@ const modalVariants = {
 };
 
 export default function CreatePlaylistModal() {
-  const { isPlaylistModalOpen, closePlaylistModal } = useModalStore();
+  console.log('create playlist page')
+  // ✅ FIX: use correct Zustand values
+  const { isCreatePlaylistOpen, closeCreatePlaylist } = useModalStore();
 
   const {
     register,
@@ -31,13 +33,16 @@ export default function CreatePlaylistModal() {
       const playlistData = {
         name: data.name,
         description: data.description,
-        songs: data.songs ? data.songs.split(",").map((s) => s.trim()).filter(Boolean) : [],
+        songs: data.songs
+          ? data.songs.split(",").map((s) => s.trim()).filter(Boolean)
+          : [],
       };
-      
+
       await musicApi.createPlaylist(playlistData);
+
       toast.success("Playlist created successfully!");
       reset();
-      closePlaylistModal(); // Close modal on success
+      closeCreatePlaylist(); // ✅ FIX: use correct close function
     } catch (err) {
       toast.error(err.message || "Failed to create playlist.");
     }
@@ -45,7 +50,7 @@ export default function CreatePlaylistModal() {
 
   return (
     <AnimatePresence>
-      {isPlaylistModalOpen && (
+      {isCreatePlaylistOpen && (
         <motion.div
           className="fixed inset-0 z-[100] flex items-center justify-center p-4"
           variants={backdropVariants}
@@ -54,9 +59,9 @@ export default function CreatePlaylistModal() {
           exit="hidden"
         >
           {/* Backdrop */}
-          <div 
+          <div
             className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-            onClick={closePlaylistModal}
+            onClick={closeCreatePlaylist}
           ></div>
 
           {/* Modal */}
@@ -65,7 +70,7 @@ export default function CreatePlaylistModal() {
             variants={modalVariants}
           >
             <button
-              onClick={closePlaylistModal}
+              onClick={closeCreatePlaylist}
               className="absolute top-3 right-3 p-1 rounded-full text-muted-foreground transition-colors hover:bg-white/10"
             >
               <X size={20} />
@@ -73,6 +78,7 @@ export default function CreatePlaylistModal() {
 
             <h2 className="text-2xl font-bold mb-4">Create New Playlist</h2>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+              {/* Playlist Name */}
               <div>
                 <input
                   {...register("name", { required: "Playlist name is required" })}
@@ -83,6 +89,8 @@ export default function CreatePlaylistModal() {
                   <p className="text-red-400 text-sm mt-1">{errors.name.message}</p>
                 )}
               </div>
+
+              {/* Description */}
               <div>
                 <input
                   {...register("description")}
@@ -90,6 +98,8 @@ export default function CreatePlaylistModal() {
                   className="w-full p-3 rounded-lg bg-transparent border border-white/10 focus:border-primary focus:ring-1 focus:ring-primary outline-none"
                 />
               </div>
+
+              {/* Song IDs */}
               <div>
                 <input
                   {...register("songs")}
@@ -97,6 +107,8 @@ export default function CreatePlaylistModal() {
                   className="w-full p-3 rounded-lg bg-transparent border border-white/10 focus:border-primary focus:ring-1 focus:ring-primary outline-none"
                 />
               </div>
+
+              {/* Submit Button */}
               <button
                 type="submit"
                 disabled={isSubmitting}
