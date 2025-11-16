@@ -23,7 +23,7 @@ export default function MainLayout({ children }) {
       <div className="flex gap-2 h-[calc(100vh-160px)]">
         {/* Sidebar */}
         <Sidebar />
-
+ 
         {/* Main Scrollable Content */}
         <main className="flex-1 glass rounded-xl overflow-y-auto">
           <StickyHeader />

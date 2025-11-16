@@ -6,7 +6,7 @@ import { Navigate, useLocation } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 
 export default function ProtectedRoute({ children }) {
-  const { user, loading } = useAuth();
+  const { user, loading } = useAuth();  
   const location = useLocation();
 
   // 1. Show a loading spinner while AuthContext is checking.
