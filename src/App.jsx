@@ -1,5 +1,6 @@
+// src/App.jsx
 import React from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate, Outlet } from "react-router-dom";
 import { usePlayer } from "./context/PlayerContext.jsx";
 
 // Page Imports
@@ -11,21 +12,38 @@ import ResetPassword from "./pages/ResetPassword.jsx";
 import Dashboard from "./pages/Dashboard.jsx";
 import PlaylistPage from "./pages/PlaylistPage.jsx";
 import Playlists from "./pages/Playlists.jsx";
-import CreatePlaylist from "./components/CreatePlaylistModal.jsx";
 import GoogleCallback from "./pages/GoogleCallback.jsx";
-import MainLayout from "./components/MainLayout";
 
 // Component Imports
 import Navbar from "./components/Navbar.jsx";
 import Player from "./components/Player.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
+import MainLayout from "./components/MainLayout.jsx";
+import Library from "./pages/Library.jsx";
+
+/**
+ * ProtectedLayout
+ * A small wrapper that composes ProtectedRoute + MainLayout + Outlet so we can
+ * define protected child routes just once.
+ */
+function ProtectedLayout() {
+  return (
+    <ProtectedRoute>
+      <MainLayout>
+        {/* child protected routes render here */}
+        <Outlet />
+      </MainLayout>
+    </ProtectedRoute>
+  );
+}
 
 export default function App() {
   const { currentSong, playNext, playPrev } = usePlayer();
 
   return (
-    <div className="min-h-screen flex flex-col bg-background text-white">
+    <div className="min-h-screen flex  flex-col bg-background text-white">
       <Navbar />
+
       <main className="flex-1">
         <Routes>
           {/* Public Routes */}
@@ -36,47 +54,14 @@ export default function App() {
           <Route path="/reset" element={<ResetPassword />} />
           <Route path="/google-callback" element={<GoogleCallback />} />
 
-          {/* Protected Routes */}
-          <Route
-            path="/dashboard"
-            element={
-              <ProtectedRoute>
-                <MainLayout>
-                  <Dashboard />
-                </MainLayout>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/playlists"
-            element={
-              <ProtectedRoute>
-                <MainLayout>
-                  <Playlists />
-                </MainLayout>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/playlist/:id"
-            element={
-              <ProtectedRoute>
-                <MainLayout>
-                  <PlaylistPage />
-                </MainLayout>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/create-playlist"
-            element={
-              <ProtectedRoute>
-                <MainLayout>
-                  <CreatePlaylist />
-                </MainLayout>
-              </ProtectedRoute>
-            }
-          />
+          {/* Protected routes grouped under ProtectedLayout */}
+          <Route element={<ProtectedLayout />}>
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/playlists" element={<Playlists />} />
+            <Route path="/playlist/:id" element={<PlaylistPage />} />
+            <Route path="/library" element={<Library />} />
+
+          </Route>
 
           {/* Fallback */}
           <Route path="*" element={<Navigate to="/" replace />} />
@@ -85,11 +70,7 @@ export default function App() {
 
       {/* Persistent Player */}
       {currentSong && (
-        <Player
-          songToPlay={currentSong}
-          onPlayNext={playNext}
-          onPlayPrev={playPrev}
-        />
+        <Player songToPlay={currentSong} onPlayNext={playNext} onPlayPrev={playPrev} />
       )}
     </div>
   );

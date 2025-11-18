@@ -6,8 +6,11 @@ export const useModalStore = create((set) => ({
   openCreatePlaylist: () => set({ isCreatePlaylistOpen: true }),
   closeCreatePlaylist: () => set({ isCreatePlaylistOpen: false }),
 
-  // Mobile menu
+  // Mobile menu (sidebar drawer)
   isMobileMenuOpen: false,
   openMobileMenu: () => set({ isMobileMenuOpen: true }),
   closeMobileMenu: () => set({ isMobileMenuOpen: false }),
+
+  // Other (kept for future)
+  // Add other modal states here as needed
 }));

@@ -1,218 +1,126 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { motion } from "framer-motion";
-import {
-  Play,
-  Pause,
-  SkipBack,
-  SkipForward,
-  Volume2,
-  VolumeX,
-} from "lucide-react";
+import { Play, Pause, SkipBack, SkipForward, Volume2, VolumeX } from "lucide-react";
 
-// --- Main Player Component ---
-// We now accept props to control the player from a global state/context
 export default function Player({ songToPlay, onPlayNext, onPlayPrev }) {
-  // --- Audio State ---
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentSong, setCurrentSong] = useState(songToPlay || null);
-  const [progress, setProgress] = useState(0); // in seconds
-  const [duration, setDuration] = useState(0); // in seconds
-  const [volume, setVolume] = useState(0.75); // 0 to 1
+  const [progress, setProgress] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [volume, setVolume] = useState(0.78);
   const [isMuted, setIsMuted] = useState(false);
+  const audioRef = useRef(null);
+  const progressBarRef = useRef(null);
 
-  // --- Refs ---
-  const audioRef = useRef(null); // Ref for the <audio> element
-  const progressBarRef = useRef(null); // Ref for the progress bar for seeking
-
-  // --- Effect to load a new song ---
   useEffect(() => {
     if (songToPlay && audioRef.current) {
       setCurrentSong(songToPlay);
-      audioRef.current.src = songToPlay.songUrl; // Assumes song object has 'songUrl'
-      audioRef.current.play();
-      setIsPlaying(true);
-    }
-    // Set a default song if none is provided
-    else if (!songToPlay && !currentSong) {
-      setCurrentSong({
-        title: "No track selected",
-        artist: "—",
-        coverImageUrl: "https://placehold.co/64x64/27272a/71717a?text=Aura",
-        songUrl: "",
-      });
+      audioRef.current.src = songToPlay.songUrl || "";
+      if (audioRef.current.src) {
+        audioRef.current.play().catch(()=>{});
+        setIsPlaying(true);
+      }
     }
   }, [songToPlay]);
 
-  // --- Effect for Volume ---
   useEffect(() => {
-    if (audioRef.current) {
-      audioRef.current.volume = isMuted ? 0 : volume;
-    }
+    if (audioRef.current) audioRef.current.volume = isMuted ? 0 : volume;
   }, [volume, isMuted]);
 
-  // --- Audio Event Handlers ---
   const onTimeUpdate = () => {
-    setProgress(audioRef.current.currentTime);
+    if (audioRef.current) setProgress(audioRef.current.currentTime);
   };
-
   const onLoadedMetadata = () => {
-    setDuration(audioRef.current.duration);
+    if (audioRef.current) setDuration(audioRef.current.duration || 0);
   };
-
   const onSongEnd = () => {
     setIsPlaying(false);
-    if (onPlayNext) {
-      onPlayNext();
-    } else {
-      setProgress(0); // Reset progress if no next song fn
-    }
+    if (onPlayNext) onPlayNext();
   };
 
-  // --- Control Functions ---
   const togglePlayPause = () => {
-    if (isPlaying) {
-      audioRef.current.pause();
-    } else {
-      if (audioRef.current.src) {
-        audioRef.current.play();
-      }
-    }
+    if (!audioRef.current) return;
+    if (isPlaying) audioRef.current.pause();
+    else audioRef.current.play().catch(()=>{});
     setIsPlaying(!isPlaying);
   };
 
   const handleSeek = (e) => {
-    if (!progressBarRef.current || !duration) return;
-    const { width } = progressBarRef.current.getBoundingClientRect();
-    const clickX = e.nativeEvent.offsetX;
+    if (!progressBarRef.current || !duration || !audioRef.current) return;
+    const { left, width } = progressBarRef.current.getBoundingClientRect();
+    const clickX = Math.max(0, Math.min(width, e.clientX - left));
     const newTime = (clickX / width) * duration;
-    
-    if (isFinite(newTime)) {
-      audioRef.current.currentTime = newTime;
-      setProgress(newTime);
-    }
+    audioRef.current.currentTime = newTime;
+    setProgress(newTime);
   };
 
-  // --- Utility Functions ---
-  const formatTime = (timeInSeconds) => {
-    if (!timeInSeconds || !isFinite(timeInSeconds)) return "0:00";
-    const minutes = Math.floor(timeInSeconds / 60);
-    const seconds = Math.floor(timeInSeconds % 60);
-    return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
+  const formatTime = (t) => {
+    if (!t || !isFinite(t)) return "0:00";
+    const m = Math.floor(t / 60), s = Math.floor(t % 60);
+    return `${m}:${s < 10 ? "0" : ""}${s}`;
   };
 
-  const progressPercentage = duration ? (progress / duration) * 100 : 0;
+  const pct = duration ? (progress / duration) * 100 : 0;
 
   return (
     <>
-      {/* The actual audio element, hidden */}
-      <audio
-        ref={audioRef}
-        onTimeUpdate={onTimeUpdate}
-        onLoadedMetadata={onLoadedMetadata}
-        onEnded={onSongEnd}
-      />
-
-      {/* The Visible Player Bar */}
+      <audio ref={audioRef} onTimeUpdate={onTimeUpdate} onLoadedMetadata={onLoadedMetadata} onEnded={onSongEnd} />
       <motion.div
-        className="fixed bottom-4 left-1/2 -translate-x-1/2 w-[95%] max-w-4xl glass rounded-xl p-3 z-50
-                   border border-white/10 shadow-xl"
-        initial={{ y: 100, opacity: 0 }}
+        initial={{ y: 40, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        transition={{ type: "spring", stiffness: 100, damping: 20 }}
+        className="fixed left-1/2 -translate-x-1/2 bottom-[20px] z-50 w-[95%] max-w-4xl player-glow"
+        style={{ paddingBottom: "var(--safe-bottom)" }}
       >
-        <div className="flex items-center gap-4">
-          
-          {/* Section 1: Song Info */}
-          <div className="flex items-center gap-3 flex-1 min-w-0 md:w-1/3">
+        <div className="glass rounded-2xl p-3 md:p-4 border border-white/6 flex items-center gap-4">
+          {/* Left: cover + track */}
+          <div className="flex items-center gap-3 min-w-0">
             <img
               src={currentSong?.coverImageUrl}
               alt={currentSong?.title}
-              className="w-14 h-14 rounded-md object-cover flex-shrink-0"
-              onError={(e) => e.target.src = 'https://placehold.co/64x64/27272a/71717a?text=Aura'}
+              className="w-12 h-12 rounded-md object-cover"
+              onError={(e)=> (e.currentTarget.src="https://placehold.co/64x64/27272a/71717a?text=A")}
             />
             <div className="min-w-0">
-              <div className="font-semibold truncate">{currentSong?.title}</div>
-              <div className="text-sm text-muted-foreground truncate">
-                {currentSong?.artist}
-              </div>
+              <div className="font-semibold truncate-ellipsis">{currentSong?.title}</div>
+              <div className="text-sm text-muted truncate-ellipsis">{currentSong?.artist}</div>
             </div>
           </div>
 
-          {/* Section 2: Player Controls & Progress */}
-          <div className="flex flex-col items-center gap-2 flex-1 md:w-1/3">
-            {/* Control Buttons */}
-            <div className="flex items-center gap-4">
-              <button
-                onClick={onPlayPrev || (() => {})}
-                className="text-muted-foreground transition-colors hover:text-primary disabled:opacity-30"
-                disabled={!onPlayPrev}
-              >
-                <SkipBack size={20} fill="currentColor" />
+          {/* Middle: controls + progress */}
+          <div className="flex-1 flex flex-col items-center gap-2">
+            <div className="flex items-center gap-6">
+              <button onClick={onPlayPrev || (()=>{})} className="text-muted hover:text-white disabled:opacity-40">
+                <SkipBack size={20}/>
               </button>
-              
-              <button
-                onClick={togglePlayPause}
-                className="w-10 h-10 rounded-full bg-primary text-black flex items-center justify-center
-                           shadow-lg shadow-primary/30 transition-transform hover:scale-105"
-                disabled={!currentSong?.songUrl}
-              >
-                {isPlaying ? (
-                  <Pause size={20} fill="currentColor" />
-                ) : (
-                  <Play size={20} fill="currentColor" className="ml-0.5" />
-                )}
-              </button>
-              
-              <button
-                onClick={onPlayNext || (() => {})}
-                className="text-muted-foreground transition-colors hover:text-primary disabled:opacity-30"
-                disabled={!onPlayNext}
-              >
-                <SkipForward size={20} fill="currentColor" />
+
+              <div className="play-outer">
+                <button onClick={togglePlayPause} className="play-center">
+                  {isPlaying ? <Pause size={18} /> : <Play size={18} />}
+                </button>
+              </div>
+
+              <button onClick={onPlayNext || (()=>{})} className="text-muted hover:text-white disabled:opacity-40">
+                <SkipForward size={20}/>
               </button>
             </div>
-            
-            {/* Progress Bar */}
-            <div className="w-full flex items-center gap-2">
-              <span className="text-xs text-muted-foreground w-8">{formatTime(progress)}</span>
-              <div
-                ref={progressBarRef}
-                onClick={handleSeek}
-                className="h-1.5 bg-white/10 rounded-full w-full cursor-pointer overflow-hidden group"
-              >
-                <div
-                  style={{ width: `${progressPercentage}%` }}
-                  className="h-full bg-primary transition-all duration-75"
-                ></div>
+
+            <div className="w-full flex items-center gap-3">
+              <span className="text-xs text-muted hidden sm:block w-10 text-right">{formatTime(progress)}</span>
+
+              <div ref={progressBarRef} onClick={handleSeek} className="h-1.5 bg-white/8 rounded-full w-full cursor-pointer relative">
+                <div className="absolute left-0 top-0 h-full rounded-full" style={{ width: `${pct}%`, background: "linear-gradient(90deg, #36ead0, #4B6FF5)" }} />
               </div>
-              <span className="text-xs text-muted-foreground w-8">{formatTime(duration)}</span>
+
+              <span className="text-xs text-muted hidden sm:block w-10 text-left">{formatTime(duration)}</span>
             </div>
           </div>
 
-          {/* Section 3: Volume Control */}
-          <div className="hidden md:flex items-center justify-end gap-3 md:w-1/3 group">
-            <button
-              onClick={() => setIsMuted(!isMuted)}
-              className="text-muted-foreground transition-colors hover:text-primary"
-            >
-              {isMuted || volume === 0 ? (
-                <VolumeX size={20} />
-              ) : (
-                <Volume2 size={20} />
-              )}
+          {/* Right: volume */}
+          <div className="hidden md:flex items-center gap-3">
+            <button onClick={()=> setIsMuted(m=>!m)} className="text-muted hover:text-white">
+              {isMuted || volume === 0 ? <VolumeX size={18} /> : <Volume2 size={18} />}
             </button>
-            <input
-              type="range"
-              min="0"
-              max="1"
-              step="0.01"
-              value={isMuted ? 0 : volume}
-              onChange={(e) => {
-                setVolume(parseFloat(e.target.value));
-                if (isMuted) setIsMuted(false);
-              }}
-              className="w-24 h-1 rounded-lg cursor-pointer accent-primary"
-            />
+            <input type="range" min="0" max="1" step="0.01" value={isMuted ? 0 : volume} onChange={(e)=>{ setVolume(parseFloat(e.target.value)); if (isMuted) setIsMuted(false); }} className="w-28" />
           </div>
         </div>
       </motion.div>

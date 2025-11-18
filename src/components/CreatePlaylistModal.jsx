@@ -13,13 +13,12 @@ const backdropVariants = {
 
 const modalVariants = {
   visible: { opacity: 1, y: 0, scale: 1 },
-  hidden: { opacity: 0, y: "50px", scale: 0.95 },
+  hidden: { opacity: 0, y: 20, scale: 0.98 },
 };
 
 export default function CreatePlaylistModal() {
-  console.log('create playlist page')
-  // ✅ FIX: use correct Zustand values
-  const { isCreatePlaylistOpen, closeCreatePlaylist } = useModalStore();
+  const isOpen = useModalStore((s) => s.isCreatePlaylistOpen);
+  const close = useModalStore((s) => s.closeCreatePlaylist);
 
   const {
     register,
@@ -34,7 +33,10 @@ export default function CreatePlaylistModal() {
         name: data.name,
         description: data.description,
         songs: data.songs
-          ? data.songs.split(",").map((s) => s.trim()).filter(Boolean)
+          ? data.songs
+              .split(",")
+              .map((s) => s.trim())
+              .filter(Boolean)
           : [],
       };
 
@@ -42,17 +44,18 @@ export default function CreatePlaylistModal() {
 
       toast.success("Playlist created successfully!");
       reset();
-      closeCreatePlaylist(); // ✅ FIX: use correct close function
+      close();
     } catch (err) {
-      toast.error(err.message || "Failed to create playlist.");
+      const message = err?.response?.data?.message || err.message || "Failed to create playlist.";
+      toast.error(message);
     }
   };
 
   return (
     <AnimatePresence>
-      {isCreatePlaylistOpen && (
+      {isOpen && (
         <motion.div
-          className="fixed inset-0 z-[100] flex items-center justify-center p-4"
+          className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-4"
           variants={backdropVariants}
           initial="hidden"
           animate="visible"
@@ -60,25 +63,34 @@ export default function CreatePlaylistModal() {
         >
           {/* Backdrop */}
           <div
-            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-            onClick={closeCreatePlaylist}
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            onClick={close}
           ></div>
 
-          {/* Modal */}
+          {/* Modal container */}
           <motion.div
-            className="glass relative z-10 w-full max-w-md rounded-xl border border-white/10 p-6"
+            className="relative z-10 w-full max-w-md sm:mx-auto
+                       rounded-t-xl sm:rounded-xl border border-white/10 bg-[rgba(17,17,19,0.6)] p-4 sm:p-6"
             variants={modalVariants}
+            initial="hidden"
+            animate="visible"
+            exit="hidden"
+            style={{ minHeight: 0 }}
           >
-            <button
-              onClick={closeCreatePlaylist}
-              className="absolute top-3 right-3 p-1 rounded-full text-muted-foreground transition-colors hover:bg-white/10"
-            >
-              <X size={20} />
-            </button>
+            {/* Close button */}
+            <div className="flex items-start justify-end">
+              <button
+                onClick={close}
+                className="p-2 rounded-md text-muted-foreground hover:bg-white/5"
+                aria-label="Close"
+              >
+                <X size={18} />
+              </button>
+            </div>
 
-            <h2 className="text-2xl font-bold mb-4">Create New Playlist</h2>
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-              {/* Playlist Name */}
+            <h2 className="text-xl sm:text-2xl font-bold mb-3">Create New Playlist</h2>
+
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
               <div>
                 <input
                   {...register("name", { required: "Playlist name is required" })}
@@ -90,7 +102,6 @@ export default function CreatePlaylistModal() {
                 )}
               </div>
 
-              {/* Description */}
               <div>
                 <input
                   {...register("description")}
@@ -99,7 +110,6 @@ export default function CreatePlaylistModal() {
                 />
               </div>
 
-              {/* Song IDs */}
               <div>
                 <input
                   {...register("songs")}
@@ -108,14 +118,26 @@ export default function CreatePlaylistModal() {
                 />
               </div>
 
-              {/* Submit Button */}
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="w-full bg-primary px-5 py-3 rounded-lg text-black font-semibold transition-all hover:bg-primary/90 disabled:bg-gray-500 disabled:cursor-not-allowed"
-              >
-                {isSubmitting ? "Creating..." : "Create Playlist"}
-              </button>
+              <div className="flex gap-3">
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="flex-1 bg-primary px-4 py-3 rounded-lg text-black font-semibold transition-colors disabled:opacity-60"
+                >
+                  {isSubmitting ? "Creating..." : "Create Playlist"}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    reset();
+                    close();
+                  }}
+                  className="hidden sm:inline-block px-4 py-3 rounded-lg border border-white/10 text-sm"
+                >
+                  Cancel
+                </button>
+              </div>
             </form>
           </motion.div>
         </motion.div>

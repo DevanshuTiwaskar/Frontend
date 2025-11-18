@@ -1,47 +1,239 @@
 @import "tailwindcss";
 
-/* 🌈 Define custom theme colors here */
-@theme {
-  --color-primary: #1DB954;   /* Spotify green */
-  --color-dark: #121212;      /* Deep dark background */
-  --color-light: #FFFFFF;     /* White for contrast */
-  --color-gray: #B3B3B3;      /* Neutral gray */
-}
+/* ======================================================
+   Aura — Enhanced Futuristic UI Styles
+   - stronger glass, animated accent gradients
+   - subtle motion, better scrollbars, focus states
+   - use CSS variables for easy recoloring
+   ====================================================== */
 
-/* 🖤 Optional: Global dark mode setup */
+/* --- Theme variables (tweak these for different palettes) --- */
 :root {
-  color-scheme: dark;
+  --bg-900: #071016;        /* base page background */
+  --bg-850: #0b1721;
+  --bg-800: #0f2634;
+  --card-surface: rgba(255,255,255,0.02);
+  --glass-border: rgba(255,255,255,0.06);
+  --glass-border-strong: rgba(255,255,255,0.08);
+  --accent-start: #36ead0;  /* cyan */
+  --accent-mid:   #5b8cff;  /* blue */
+  --accent-end:   #9b59ff;  /* purple */
+  --accent-soft: rgba(90,140,255,0.12);
+  --primary: #2EE07A;       /* green-ish */
+  --muted: rgba(255,255,255,0.64);
+  --glass-blur: 10px;
+  --radius-lg: 14px;
+  --radius-md: 10px;
 }
 
-/* 🧠 Optional base styling for body */
+/* --- Base page background with soft radial accents --- */
 body {
-  @apply bg-dark text-light font-sans;
+  background:
+    radial-gradient(900px 420px at 8% 12%, rgba(91,140,255,0.03), transparent 8%),
+    radial-gradient(700px 300px at 90% 80%, rgba(54,234,208,0.02), transparent 3%),
+    linear-gradient(180deg, var(--bg-900), var(--bg-850));
+  color: #fff;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: "tnum";
+  -webkit-tap-highlight-color: transparent;
 }
 
-/* CSS variables for color + spacing */
-:root{
-  --bg: #0b1220;
-  --surface: #071028;
-  --muted: #94a3b8;
-  --accent: #7c3aed;
-  --primary: #1DB954;
-}
-
-/* simple global style */
-html,body,#root{
-  height:100%;
-}
-body{
-  background: linear-gradient(180deg, var(--bg) 0%, #020617 100%);
-  color: #e6eef8;
-  font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-  -webkit-font-smoothing:antialiased;
-  -moz-osx-font-smoothing:grayscale;
-}
-
-/* small utility for glass card */
+/* ======================================================
+   Glass surfaces — stronger depth, subtle outline & blur
+   ====================================================== */
 .glass {
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  box-shadow:
+    0 10px 30px rgba(2,6,23,0.6),
+    inset 0 1px 0 rgba(255,255,255,0.02);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
 }
+
+/* micro lift on hover for clickable glass elements */
+.glass:hover {
+  transform: translateY(-4px);
+  box-shadow:
+    0 18px 40px rgba(2,6,23,0.7),
+    inset 0 1px 0 rgba(255,255,255,0.02);
+}
+
+/* Lighter inner panel used inside cards/lists */
+.panel {
+  background: linear-gradient(180deg, rgba(255,255,255,0.018), rgba(255,255,255,0.006));
+  border-radius: 12px;
+  padding: 0.5rem;
+}
+
+/* ======================================================
+   Animated accent gradient (for buttons, progress, etc.)
+   ====================================================== */
+@keyframes accent-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.accent-gradient {
+  background: linear-gradient(90deg, var(--accent-start), var(--accent-mid), var(--accent-end));
+  background-size: 300% 300%;
+  animation: accent-shift 6s linear infinite;
+  color: #001;
+}
+
+/* Accent pill (rounded tag) */
+.accent-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.35rem 0.8rem;
+  border-radius: 999px;
+  font-weight: 700;
+  box-shadow: 0 6px 18px rgba(75,111,245,0.06);
+}
+
+/* ======================================================
+   Buttons & inputs — focus, hover, and accessible styles
+   ====================================================== */
+button, a.button-like {
+  transition: transform .12s ease, box-shadow .12s ease, opacity .12s ease;
+}
+
+button:focus,
+input:focus,
+textarea:focus {
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(91,140,255,0.12);
+  border-color: var(--glass-border-strong);
+}
+
+/* primary CTA */
+.btn-primary {
+  background: linear-gradient(90deg, var(--accent-start), var(--accent-mid));
+  color: #08121a;
+  padding: 0.6rem 1rem;
+  border-radius: 12px;
+  font-weight: 700;
+}
+
+.btn-primary:hover { transform: translateY(-2px); }
+
+/* subtle secondary */
+.btn-ghost {
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.03);
+  padding: 0.5rem 0.9rem;
+  border-radius: 10px;
+}
+
+/* ======================================================
+   Cards & playlist artwork hover effects
+   ====================================================== */
+.card {
+  border-radius: 12px;
+  overflow: hidden;
+  background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.008));
+  transition: transform .2s cubic-bezier(.2,.95,.2,1), box-shadow .2s ease;
+}
+.card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 60px rgba(11,20,30,0.7);
+}
+
+.card .cover {
+  border-radius: 10px;
+  overflow: hidden;
+  background: rgba(255,255,255,0.02);
+}
+
+/* play overlay */
+.play-overlay {
+  position: absolute;
+  inset: 0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background: linear-gradient(180deg, rgba(0,0,0,0.0), rgba(0,0,0,0.44));
+  opacity: 0;
+  transition: opacity .18s ease, transform .18s ease;
+}
+.card:hover .play-overlay { opacity:1; transform: translateY(0); }
+
+/* play button visual */
+.play-outer {
+  background: rgba(255,255,255,0.018);
+  padding: 6px;
+  border-radius: 999px;
+}
+.play-center {
+  width: 56px;
+  height: 56px;
+  border-radius: 999px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background: linear-gradient(90deg, rgba(54,234,208,1), rgba(75,111,245,1));
+  box-shadow: 0 10px 30px rgba(75,111,245,0.18), 0 2px 6px rgba(0,0,0,0.6);
+  transform: translateY(0);
+}
+
+/* ======================================================
+   Scrollbars (more tactile) — panels and long lists
+   ====================================================== */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:hover { filter: brightness(1.1); }
+
+/* ======================================================
+   Player glow & layout tweaks
+   ====================================================== */
+.player-glow {
+  box-shadow: 0 12px 40px rgba(75,111,245,0.08), inset 0 1px 0 rgba(255,255,255,0.02);
+  backdrop-filter: blur(8px);
+}
+
+/* ======================================================
+   Utility helpers
+   ====================================================== */
+.truncate-ellipsis { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.text-muted { color: var(--muted); font-size: 0.95rem; }
+
+/* small avatar */
+.avatar-sm { width: 32px; height: 32px; border-radius: 999px; display:inline-flex; align-items:center; justify-content:center; }
+
+/* ring on focus for keyboard users */
+:focus-visible { outline: none; box-shadow: 0 0 0 4px rgba(91,140,255,0.08); border-radius: 8px; }
+
+/* selection color */
+::selection { background: linear-gradient(90deg, rgba(54,234,208,0.18), rgba(75,111,245,0.18)); color: #fff; }
+
+/* Responsive tweaks */
+@media (max-width: 640px) {
+  .glass { border-radius: 12px; }
+  .play-center { width: 48px; height: 48px; }
+  .player-glow { padding-bottom: env(safe-area-inset-bottom, 12px); }
+}
+
+/* ======================================================
+   Small motion: prefer-reduced-motion respects users' settings
+   ====================================================== */
+@media (prefers-reduced-motion: reduce) {
+  .glass, .card, .play-center, .accent-gradient { transition: none; animation: none; transform: none; }
+}
+
+/* quick helper classes you might find useful in templates */
+.bg-accent-soft { background: linear-gradient(90deg, rgba(54,234,208,0.06), rgba(91,140,255,0.04)); }
+.border-soft { border: 1px solid rgba(255,255,255,0.03); }
+
+/* safe bottom variable for player spacing */
+:root { --safe-bottom: env(safe-area-inset-bottom, 0px); }
