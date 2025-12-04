@@ -13,13 +13,16 @@ import Dashboard from "./pages/Dashboard.jsx";
 import PlaylistPage from "./pages/PlaylistPage.jsx";
 import Playlists from "./pages/Playlists.jsx";
 import GoogleCallback from "./pages/GoogleCallback.jsx";
+import Library from "./pages/Library.jsx";
+
+// New Artist page import
+import ArtistDashboard from "./pages/ArtistDashboard.jsx";
 
 // Component Imports
 import Navbar from "./components/Navbar.jsx";
 import Player from "./components/Player.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import MainLayout from "./components/MainLayout.jsx";
-import Library from "./pages/Library.jsx";
 
 /**
  * ProtectedLayout
@@ -41,7 +44,7 @@ export default function App() {
   const { currentSong, playNext, playPrev } = usePlayer();
 
   return (
-    <div className="min-h-screen flex  flex-col bg-background text-white">
+    <div className="min-h-screen flex flex-col bg-background text-white">
       <Navbar />
 
       <main className="flex-1">
@@ -61,6 +64,8 @@ export default function App() {
             <Route path="/playlist/:id" element={<PlaylistPage />} />
             <Route path="/library" element={<Library />} />
 
+            <Route path="/artist/dashboard" element={<ArtistDashboard />} />
+            {/* Artist Dashboard - protected */}
           </Route>
 
           {/* Fallback */}

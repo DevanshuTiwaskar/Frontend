@@ -19,7 +19,7 @@ export default function GoogleCallback() {
         navigate("/dashboard");
       } else {
         // If it fails (e.g., cookie invalid), send to login
-        navigate("/login");
+        navigate("/login");      
       }
     };
 
