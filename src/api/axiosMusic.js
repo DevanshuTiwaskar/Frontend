@@ -1,7 +1,7 @@
 import axios from "axios";
 
 // ✅ Base URL (from .env or default)
-const baseURL = import.meta.env.VITE_MUSIC_BASE_URL || "http://localhost:3002";
+const baseURL = import.meta.env.VITE_MUSIC_BASE_URL || "http://localhost:8080";
 
 // ✅ Create the Axios instance
 const axiosMusic = axios.create({
