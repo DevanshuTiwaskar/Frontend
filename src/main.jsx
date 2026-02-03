@@ -5,7 +5,7 @@ import { AuthProvider } from './context/AuthContext';
 import { PlayerProvider } from './context/PlayerContext.jsx';
 import { Toaster } from 'react-hot-toast'; // For auth notifications
 import './index.css'; // Your main Tailwind stylesheet
-import App from './app';
+import App from './App.jsx';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
     <BrowserRouter>
