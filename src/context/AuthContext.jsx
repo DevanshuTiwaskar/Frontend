@@ -144,9 +144,8 @@ export const AuthProvider = ({ children }) => {
   };
 
   const googleLogin = () => {
-    // backend should kick off oauth and set cookie on redirect
-    const baseURL = import.meta.env.VITE_AUTH_BASE_URL || "http://localhost:3000";
-    window.location.href = `${baseURL}/api/auth/google`;
+    // Use relative URL so it works with the unified API Gateway
+    window.location.href = `/api/auth/google`;
   };
 
   return (
